@@ -38,55 +38,73 @@ const MORSE_TABLE = {
 };
 
 function decode(expr) {
-    let tempStr = expr.toLowerCase();
-    let codeArray = Object.entries(MORSE_TABLE);
     let result = [];
-    let preResult = [];
-    let resultStr = '';
+    let arrayCode = [];
+    let codeArray = Object.entries(MORSE_TABLE);
     let count = 0;
 
-    tempStr.split('').forEach(element => {
-        let countIntro = 0;
-        codeArray.forEach(element2 => {
-            if (element === element2[1]) {
-                preResult = preResult.concat(element2[0]);
-            } else if (element === ' ' && countIntro === 0) {
-                preResult = preResult.concat('**********');
-                countIntro++;
-            }
-        });
-    });
-
-    preResult.forEach(element => {
-        let tempStr = '';
-
-        for (let i = 0; i < element.length; i++) {
-            if (element[i] === '.') {
-                tempStr = tempStr + "10";
-            } else if (element[i] === '-') {
-                tempStr = tempStr + "11";
-            } else {
-                tempStr = tempStr + "*"
-            }
-        }
-        result[count] = tempStr;
+    for (let i = 0; i < expr.length; i++) {
+        arrayCode[count] = expr.substr(i, 10);
+        i = i + 9;
         count++;
-    });
+    }
 
-    result.forEach(element => {
-        if (element.length !== 10) {
-            let str = "0000000000";
-            let count = str.length - element.length;
-            str = str.substr(0, count).concat(element);
-            resultStr = resultStr + str;
+    count = 0;
+    arrayCode = arrayCode.map(element => {
+        if (element !== "**********") {
+            let arrayPre = new Array(5);
+            for (let i = 0; i < 10; i++) {
+                arrayPre[count] = element.substr(i, 2);
+                count++;
+                i++;
+            }
+            count = 0;
+            return arrayPre;
         } else {
-            resultStr = resultStr + element;
+            return element;
         }
     })
-    return resultStr
-}
 
-console.log(decode("aaaa aaaaa aaaa aaaa"));
+    arrayCode = arrayCode.map(element => {
+        if (element !== "**********") {
+            element = element.map(element2 => {
+                if (element2 === "00") {
+                    return '';
+                } else if (element2 === "10") {
+                    return '.';
+                } else if (element2 === "11") {
+                    return '-';
+                }
+            });
+            return element;
+        } else {
+            return " ";
+        }
+    })
+
+    arrayCode = arrayCode.map(element => {
+        if (element !== ' ') {
+            element = element.join('').replace(/,/g, '');
+            return element;
+        } else {
+            return element;
+        }
+    })
+
+    result = arrayCode.map(element => {
+        if (element !== ' ') {
+            codeArray.forEach(element2 => {
+                if (element2[0] === element) {
+                    element = element2[1];
+                }
+            });
+            return element;
+        } else {
+            return element;
+        }
+    })
+    return result.join('');
+}
 
 module.exports = {
     decode
